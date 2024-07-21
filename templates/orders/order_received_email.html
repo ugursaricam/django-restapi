@@ -1,0 +1,13 @@
+{% autoescape off %}
+
+Hallo {{ user.company_name }}!
+
+Ihre Bestellung ist eingegangen und wird nun bearbeitet. Die Details Ihrer Bestellung sind unten zu Ihrer Information aufgeführt:
+
+Online Bestellnummer: #{{ order.order_number }}
+
+Wenn Sie Fragen zu Ihrer Bestellung haben, kontaktieren Sie uns bitte unter. 
+
+Gemex Handels GmbH
+
+{% endautoescape %}

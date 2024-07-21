@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- ========================= SECTION MAIN ========================= -->
+<section class="section-intro padding-y-sm">
+    <div class="container">
+
+        <div class="intro-banner-wrap text-center">
+            <img src="{% static 'images/banners/gemex-halle.jpg' %}" class="img-fluid rounded" style="display: inline-block;">
+        </div>
+
+        <!-- ========================= SECTION WELCOME ========================= -->
+        <section class="section-welcome text-center mt-5">
+            <div class="container">
+                <h1 class="display-5">Willkommen bei Gemex Berlin!</h1>
+                <p class="lead" style="font-size: 1rem;">
+                    Wir sind Ihr Ansprechpartner und Händler wenn es um Obst, Gemüse und andere Lebensmittel für Ihre Küche geht.
+                </p>
+                <p class="lead" style="font-size: 1rem;">
+                    Bei uns ist jeder Kunde König egal ob Großabnehmer oder der Familienwochenendeinkäufer.
+                </p>
+            </div>
+        </section>
+        <!-- ========================= SECTION WELCOME END ========================= -->
+
+        <!-- ========================= SECTION MARQUEE ========================= -->
+        <section class="section-marquee text-center mt-3">
+            <div class="container">
+                <marquee style="font-size: 1rem;">
+                    Wir liefern in alle Berliner Bezirke und nach Absprache auch ins Berliner Umland.
+                </marquee>
+            </div>
+        </section>
+		<!-- ========================= SECTION MARQUEE END ========================= -->
+    </div>
+</section>
+
+{% endblock %}
+
+
+<!-- ========================= SECTION MAIN END// ========================= -->
+
+
+<!-- ========================= SECTION  ========================= -->
+<!-- <section class="section-name padding-y-sm">
+<div class="container">
+<header class="section-heading">
+	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
+	<h3 class="section-title">Popular products</h3>
+</header> 
+
+<div class="row">
+	{% for product in products %}
+	<div class="col-md-3">
+		<div class="card card-product-grid">
+			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+			<figcaption class="info-wrap">
+				<a href="{{ product.get_url }}" class="title">{{ product.product_name}}</a>
+				<div class="price mt-1">€ {{ product.price }}</div> 
+			</figcaption>
+		</div>
+	</div> 
+	{% endfor %}
+</div>
+
+</div> 
+</section> -->
+<!-- ========================= SECTION  END// ========================= -->
