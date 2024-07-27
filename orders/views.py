@@ -118,34 +118,31 @@ def create_csv_view(request):
     if request.method == 'POST':
         now = timezone.now()
         current_datetime = now.strftime("%Y%m%d%H%M%S")  # YYYYMMDDHHMMSS formatında datetime
-        desktop_path = get_csv_directory()
-        directory_path = os.path.join(desktop_path, 'csv_files')
         filename = f"{current_datetime}.csv"
-        filepath = os.path.join(directory_path, filename)
 
-        # csv_files klasörünün var olduğundan emin olun
-        os.makedirs(directory_path, exist_ok=True)
+        # CSV dosyasını bellekte oluşturma
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        csvwriter = csv.writer(response, delimiter=';')
 
         company_names = set()
         order_products = OrderProduct.objects.filter(order__csv_exported=False)
         
-        with open(filepath, 'w', newline='') as csvfile:
-            csvwriter = csv.writer(csvfile, delimiter=';')
+        for order_product in order_products:
+            csvwriter.writerow([
+                order_product.order.company_number,
+                order_product.product.product_number,
+                order_product.quantity,
+                now.strftime('%Y%m%d')  # Siparişin CSV'ye eklendiği zamanı yaz
+            ])
+            company_names.add(order_product.order.company_name)
 
-            for order_product in order_products:
-                csvwriter.writerow([
-                    order_product.order.company_number,
-                    order_product.product.product_number,
-                    order_product.quantity,
-                    now.strftime('%Y%m%d')
-                ])
-                company_names.add(order_product.order.company_name)
-
-                # Siparişin CSV'ye aktarıldığını işaretle
-                order_product.order.csv_exported = True
-                order_product.order.save()
+            # Siparişin CSV'ye aktarıldığını işaretle
+            order_product.order.csv_exported = True
+            order_product.order.save()
 
         company_names_list = list(company_names)
-        return HttpResponse(f"Successfully created {filename} at {filepath}. Companies: {', '.join(company_names_list)}")
+        return response
 
     return render(request, 'orders/create_csv.html')
