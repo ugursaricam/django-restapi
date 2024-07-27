@@ -107,8 +107,8 @@ def place_order(request, total=0, quantity=0):
         return redirect('home')
     
 
-def get_desktop_path():
-    return os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+def get_csv_directory():
+    return '\\Gemexsrv\daten\okrawws\INTERNET\IMPORT'
 
 def is_admin(user):
     return user.is_admin
@@ -118,7 +118,7 @@ def create_csv_view(request):
     if request.method == 'POST':
         now = timezone.now()
         current_datetime = now.strftime("%Y%m%d%H%M%S")  # YYYYMMDDHHMMSS formatında datetime
-        desktop_path = get_desktop_path()
+        desktop_path = get_csv_directory()
         directory_path = os.path.join(desktop_path, 'csv_files')
         filename = f"{current_datetime}.csv"
         filepath = os.path.join(directory_path, filename)
