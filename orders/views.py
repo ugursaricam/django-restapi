@@ -107,9 +107,6 @@ def place_order(request, total=0, quantity=0):
         return redirect('home')
     
 
-def get_csv_directory():
-    return '\\Gemexsrv\daten\okrawws\INTERNET\IMPORT'
-
 def is_admin(user):
     return user.is_admin
 
@@ -128,13 +125,26 @@ def create_csv_view(request):
 
         company_names = set()
         order_products = OrderProduct.objects.filter(order__csv_exported=False)
+
+        # Çarpma işlemi yapılacak ürünlerin product_number değerleri (örnek olarak)
+        products_to_multiply = {
+            '0024': 3,  # Product_number '0001' olan ürünün quantity'si 2 ile çarpılacak
+            '0025': 2,  # Product_number '0002' olan ürünün quantity'si 3 ile çarpılacak
+            # Diğer ürün product_number değerleri ve çarpılacak değerler
+        }
         
         for order_product in order_products:
+            # Quantity'yi çarpma işlemi
+            quantity = order_product.quantity
+            product_number = order_product.product.product_number  # Ürünün product_number'ı
+            if product_number in products_to_multiply:
+                quantity *= products_to_multiply[product_number]
+
             csvwriter.writerow([
-                order_product.order.company_number,
-                order_product.product.product_number,
-                order_product.quantity,
-                now.strftime('%Y%m%d')  # Siparişin CSV'ye eklendiği zamanı yaz
+                order_product.order.company_number,  # customer_number
+                product_number,                      # product_number
+                quantity,                            # Çarpılmış quantity değeri
+                now.strftime('%Y%m%d')               # datetime (YYYYMMDD formatında)
             ])
             company_names.add(order_product.order.company_name)
 
@@ -146,3 +156,4 @@ def create_csv_view(request):
         return response
 
     return render(request, 'orders/create_csv.html')
+
