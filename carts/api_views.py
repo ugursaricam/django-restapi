@@ -69,3 +69,23 @@ def remove_cart_item(request, product_id, cart_item_id):
         return Response({'cart_count': cart_count, 'product_quantity': 0, 'cart_item_id': cart_item_id, 'product_id': product_id}, status=status.HTTP_200_OK)
     except CartItem.DoesNotExist:
         return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def update_quantity(request, product_id, cart_item_id):
+    product = get_object_or_404(Product, id=product_id)
+    try:
+        if request.user.is_authenticated:
+            cart_item = CartItem.objects.get(product=product, user=request.user, id=cart_item_id)
+        else:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_item = CartItem.objects.get(product=product, cart=cart, id=cart_item_id)
+        
+        # Yeni miktarı güncelle
+        quantity = int(request.data.get('quantity'))
+        cart_item.quantity = quantity
+        cart_item.save()
+        
+        cart_count = counter(request)['cart_count']
+        return Response({'cart_count': cart_count, 'quantity': cart_item.quantity, 'product_id': product_id}, status=status.HTTP_200_OK)
+    except CartItem.DoesNotExist:
+        return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)

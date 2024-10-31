@@ -3,6 +3,30 @@
 
 {% block content %}
 
+<!-- Custom styles to remove number input arrows and adjust input width -->
+<style>
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Adjust input width based on content */
+.update-quantity {
+    width: auto;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 16px;
+}
+</style>
+
 <!-- ========================= SECTION PAGETOP ========================= -->
 <section class="section-pagetop bg">
     <div class="container">
@@ -20,32 +44,10 @@
     <div class="container">
         <div class="row mt-12">
             <div class="col-md-12 text-center">
-                <a href="{% url 'cart' %}" class="btn btn-primary btn-lg">Warenkorb Anzeigen</a>
+                <a href="{% url 'cart' %}" class="btn btn-primary btn-lg" id="go-to-cart">Warenkorb Anzeigen</a>
             </div>
         </div>
     <div class="row">
-        <!-- <aside class="col-md-3">
-            <div class="card">
-                <article class="filter-group">
-                    <header class="card-header">
-                        <a href="#" data-toggle="collapse" data-target="#collapse_1" aria-expanded="true" class="">
-                            <i class="icon-control fa fa-chevron-down"></i>
-                            <h6 class="title">Categories</h6>
-                        </a>
-                    </header>
-                    <div class="filter-content collapse show" id="collapse_1" style="">
-                        <div class="card-body">
-                            <ul class="list-menu">
-                                <li><a href="{% url 'store' %}">All Products</a></li>
-                                {% for category in links %}
-                                    <li><a href="{{ category.get_url }}">{{ category.category_name }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div> 
-                    </div>
-                </article> 
-            </div>
-        </aside> -->
         <main class="col-md-12">
             <header class="border-bottom mb-4 pb-3">
                 <div class="form-inline">
@@ -74,9 +76,9 @@
                                                 <div class="input-group-prepend">
                                                     <a href="#" class="btn btn-light quantity-btn btn-minus" type="button" data-product-id="{{ product.id }}" data-cart-item-id="{{ cart_item.id }}"> <i class="fa fa-minus"></i> </a>
                                                 </div>
-                                                <input id="product_{{ product.id }}" type="text" class="form-control text-center" style="max-width: 50px;" value="{{ cart_item.quantity }}">
+                                                <input id="product_{{ product.id }}" type="number" class="form-control text-center update-quantity" style="max-width: 60px;" value="{{ cart_item.quantity }}" data-url="{% url 'update_quantity_api' product.id cart_item.id %}">
                                                 <div class="input-group-append">
-                                                    <a href="#" class="btn btn-light quantity-btn btn-plus" type="button" data-product-id="{{ product.id }}"> <i class="fa fa-plus"></i> </a>
+                                                    <a href="#" class="btn btn-light quantity-btn btn-plus" type="button" data-product-id="{{ product.id }}" data-cart-item-id="{{ cart_item.id }}"> <i class="fa fa-plus"></i> </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -96,7 +98,7 @@
             <!-- Add this new section -->
             <div class="row mt-4">
                 <div class="col-md-12 text-center">
-                    <a href="{% url 'cart' %}" class="btn btn-primary btn-lg">Warenkorb Anzeigen</a>
+                    <a href="{% url 'cart' %}" class="btn btn-primary btn-lg" id="go-to-cart">Warenkorb Anzeigen</a>
                 </div>
             </div>
             <!-- End of new section -->
@@ -158,11 +160,31 @@ $(document).ready(function() {
         alert(message);
     }
 
+    function updateQuantity(url, quantity, productId) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: {
+                quantity: quantity
+            },
+            success: function(response) {
+                $('#product_' + response.product_id).val(response.quantity);
+                console.log('Quantity updated successfully:', response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating quantity manually:', status, error);
+                alert("Miktar güncellenirken bir hata oluştu.");
+            }
+        });
+    }
+
     function handleAddToCartButtonClick(e) {
-        e.preventDefault();  // Sayfanın yenilenmesini önler
+        e.preventDefault();
         var productId = $(this).data('product-id');
         var $button = $(this);
-        console.log('Adding to cart: ', productId);  // Log product ID being added
         $.ajax({
             url: '/api/cart/add/' + productId + '/',
             type: 'POST',
@@ -171,85 +193,107 @@ $(document).ready(function() {
             },
             dataType: 'json',
             success: function(response) {
-                console.log('Add to cart response: ', response);  // Log the response
-                // Update cart count in the navbar
                 updateCartCount(response.cart_count);
-                // Update the button to reflect the new quantity
                 var quantity = response.product_quantity;
-                var inputField = $button.closest('.row').find('input[type="text"]');
-                if (inputField.length) {
-                    inputField.val(quantity);
-                } else {
-                    // If no input field, create the quantity display
-                    $button.replaceWith(`
-                        <div class="row">
-                            <div class="col text-center">
-                                <div class="input-group input-spinner justify-content-center">
-                                    <div class="input-group-prepend">
-                                        <a href="#" class="btn btn-light quantity-btn minus-btn" type="button" data-product-id="${productId}" data-cart-item-id="${response.cart_item_id}"> <i class="fa fa-minus"></i> </a>
-                                    </div>
-                                    <input id="product_${productId}" type="text" class="form-control text-center" style="max-width: 50px;" value="${quantity}">
-                                    <div class="input-group-append">
-                                        <a href="#" class="btn btn-light quantity-btn plus-btn" type="button" data-product-id="${productId}"> <i class="fa fa-plus"></i> </a>
-                                    </div>
-                                </div>
+                var cartItemId = response.cart_item_id;
+                
+                $button.replaceWith(`
+                    <div class="col text-center">
+                        <div class="input-group input-spinner justify-content-center">
+                            <div class="input-group-prepend">
+                                <a href="#" class="btn btn-light quantity-btn btn-minus" type="button" data-product-id="${productId}" data-cart-item-id="${cartItemId}"> <i class="fa fa-minus"></i> </a>
+                            </div>
+                            <input id="product_${productId}" type="number" class="form-control text-center update-quantity" style="max-width: 60px;" value="${quantity}" data-url="/api/cart/update_quantity/${productId}/${cartItemId}/">
+                            <div class="input-group-append">
+                                <a href="#" class="btn btn-light quantity-btn btn-plus" type="button" data-product-id="${productId}" data-cart-item-id="${cartItemId}"> <i class="fa fa-plus"></i> </a>
                             </div>
                         </div>
-                    `);
-                }
+                    </div>
+                `);
             },
             error: function(xhr, status, error) {
-                console.error('Error adding to cart: ', status, error);  // Log any errors
+                console.error('Error adding to cart:', status, error);
             }
         });
     }
 
-    console.log("");
     $(document).on('click', '.add-to-cart-btn', handleAddToCartButtonClick);
 
+    // Handle quantity update on manual input or blur event
+    $(document).on('blur', '.update-quantity', function(e) {
+        var url = $(this).data('url');
+        var quantity = $(this).val();
+
+        // Miktarın geçerli bir sayı olup olmadığını kontrol edin
+        if (quantity === '' || isNaN(quantity) || parseInt(quantity) <= 0) {
+            alert("Lütfen geçerli bir miktar girin.");
+            $(this).val(1);  // Geçersizse varsayılan olarak 1 atayın
+            return;
+        }
+
+        quantity = parseInt(quantity);
+
+        // Geçerli bir sayı olduğunda güncelle
+        updateQuantity(url, quantity, $(this).attr('id'));
+    });
+
+    $(document).on('input', '.update-quantity', function(e) {
+        var quantity = $(this).val();
+
+        // Kullanıcı sayıyı sildiğinde veya geçici olarak NaN olduğunda işlem yapmayın
+        if (quantity === '' || isNaN(quantity) || parseInt(quantity) <= 0) {
+            return;
+        }
+
+        // Geçerli bir sayı olduğunda bunu varsayılan olarak kabul et
+        quantity = parseInt(quantity);
+        $(this).val(quantity);
+    });
+
     $(document).on('click', '.quantity-btn', function(e) {
-        e.preventDefault();  // Sayfanın yenilenmesini önler
+        e.preventDefault();
         var productId = $(this).data('product-id');
         var cartItemId = $(this).data('cart-item-id');
         var $button = $(this);
-        console.log('Updating quantity for: ', productId);  // Log product ID being updated
-        $.ajax({
-            url: cartItemId ? `/api/cart/remove/${productId}/${cartItemId}/` : `/api/cart/add/${productId}/`,
-            type: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            dataType: 'json',
-            success: function(response) {
-                console.log('Update quantity response: ', response);  // Log the response
-                // Update cart count in the navbar
-                updateCartCount(response.cart_count);
-                // Update the button to reflect the new quantity
-                var quantity = response.product_quantity;
-                var inputField = $button.closest('.input-spinner').find('input[type="text"]');
-                if (quantity > 0) {
-                    inputField.val(quantity);
-                } else {
-                    $button.closest('.input-group').replaceWith(`
-                        <div class="">
-                            <a href="#" class="btn btn-primary btn-block add-to-cart-btn" data-product-id="${productId}">In den Warenkorb</a>
-                        </div>
-                    `);
-                    // Yeniden dinamik olay dinleyici ekliyoruz
-                    console.log("buttona tekrar event atıyorum")
-                    // $(document).on('click', '.add-to-cart-btn', handleAddToCartButtonClick);
+        var inputField = $button.closest('.input-spinner').find('.update-quantity');
+        var currentQuantity = parseInt(inputField.val());
 
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error updating quantity: ', status, error);  // Log any errors
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    showNotification(xhr.responseJSON.error);
-                }
+        if ($button.hasClass('btn-minus')) {
+            if (currentQuantity > 1) {
+                currentQuantity = currentQuantity - 1;
+            } else {
+                $.ajax({
+                    url: `/api/cart/remove_item/${productId}/${cartItemId}/`,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    success: function(response) {
+                        updateCartCount(response.cart_count);
+                        $button.closest('.input-group').replaceWith(`
+                            <div class="">
+                                <a href="#" class="btn btn-primary btn-block add-to-cart-btn" data-product-id="${productId}">In den Warenkorb</a>
+                            </div>
+                        `);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error removing item:', status, error);
+                    }
+                });
+                return;
             }
-        });
+        } else if ($button.hasClass('btn-plus')) {
+            currentQuantity = currentQuantity + 1;
+        }
+
+        inputField.val(currentQuantity);
+
+        updateQuantity(`/api/cart/update_quantity/${productId}/${cartItemId}/`, currentQuantity, inputField.attr('id'));
     });
 });
+
+
+
 </script>
 
 {% endblock %}

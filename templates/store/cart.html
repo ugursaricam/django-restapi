@@ -3,8 +3,86 @@
 
 {% block content %}
 
+
+<!-- Custom styles to remove number input arrows and adjust input width -->
+<style>
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    /* Firefox */
+    input[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+    
+    /* Sabit tablo düzeni */
+    table.table-shopping-cart {
+        table-layout: fixed; /* Tablonun sabit düzenini sağlama */
+        width: 100%; /* Tablonun tam genişlikte olmasını sağlama */
+    }
+
+/* Sabit tablo düzeni */
+table.table-shopping-cart {
+    table-layout: fixed; /* Tablonun sabit düzenini sağlama */
+    width: 100%; /* Tablonun tam genişlikte olmasını sağlama */
+}
+
+/* Löschen butonunun sabit genişliği ve margin ayarı */
+.remove-cart-item-btn {
+    width: 100px; /* Butonun sabit genişliği */
+    padding: 4px 0px;
+    font-size: 14px; /* Buton içeriği font boyutunu 14px yapma */
+    margin-left: 0px; /* Menge sütunundan uzaklaştırmak için margin ekleyin */
+    display: inline-block; /* Butonun hizalamasını koruma */
+    vertical-align: middle; /* Butonun dikey hizalamasını ortalama */
+}
+
+/* Miktar ayarlama kutusunu (input + artı/eksi butonları) küçültme */
+.input-spinner .btn {
+    width: 30px;  /* Butonların genişliğini küçültme */
+    height: 30px; /* Butonların yüksekliğini küçültme */
+    padding: 0;
+    font-size: 14px;  /* Buton içeriği font boyutunu 14px yapma */
+    
+}
+
+.input-spinner input.update-quantity {
+    max-width: 30px;  /* Input alanının genişliğini küçültme */
+    height: 30px;  /* Input alanının yüksekliğini küçültme */
+    padding: 0;
+    font-size: 14px;  /* Input alanı yazı tipi boyutunu 14px yapma */
+    text-align: center; /* Yazıyı ortalama */
+    vertical-align: middle; /* Yazıyı dikey olarak ortalama */
+}
+
+.product-name {
+    font-size: 14px; /* Artikel isminin fontunu 14px yapma */
+    text-align: center; /* Artikel ismini ortalama */
+    display: block; /* Artikel ismini blok olarak gösterme */
+}
+
+@media (max-width: 768px) {
+    .table-shopping-cart th, .table-shopping-cart td {
+        text-align: center;
+    }
+    .input-group {
+        width: 100%;
+        justify-content: center;
+    }
+    .remove-cart-item-btn {
+        width: 100%;
+        margin-top: 0px;
+    }
+}
+
+</style>
+
 <section class="section-content padding-y bg">
-    <div class="container">
+    <div class="container" id="cart-container">
     
     <!-- ============================ COMPONENT 1 ================================= -->
     
@@ -17,21 +95,21 @@
     {% else %}
     <div class="row">
         <aside class="col-lg-9">
-    <div class="card">
+            <div class="card">
     <table class="table table-borderless table-shopping-cart">
     <thead class="text-muted">
     <tr class="small text-uppercase">
-      <th scope="col">Artikel</th>
-      <th scope="col" width="120">Menge</th>
+      <th scope="col" width="120">Artikel</th>
+      <th scope="col" width="125">Menge</th>
       <th scope="col" width="120"></th>
-      <th scope="col" class="text-right" width="200"> </th>
+      
     </tr>
     </thead>
-    <tbody>
+    <tbody id="cart-items">
 
     {% for cart_item in cart_items %}
     <tr data-cart-item-id="{{ cart_item.id }}">
-        <td>
+        <td class="product-name-cell">
             <figure class="itemside align-items-center">
                 <div class="aside">
                     {% if cart_item.product.images %}
@@ -41,29 +119,32 @@
                     {% endif %}
                 </div>
                 <figcaption class="info">
-                    <a href="#" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                    <a href="#" class="title text-dark product-name">{{ cart_item.product.product_name }}</a>
                 </figcaption>
             </figure>
         </td>
-        <td> 
-            <div class="col">
+        
+        <td class="menge-cell text-center align-middle">
+            <figure class="itemside align-items-center justify-content-center">
                 <div class="input-group input-spinner">
                     <div class="input-group-prepend">
                         <button class="btn btn-light quantity-btn" type="button" data-action="decrease" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}">
                             <i class="fa fa-minus"></i>
                         </button>
                     </div>
-                    <input type="text" class="form-control text-center" style="max-width: 50px;" value="{{ cart_item.quantity }}" readonly>
+                    <input type="number" class="form-control text-center update-quantity" style="max-width: 40px;" value="{{ cart_item.quantity }}" data-url="{% url 'update_quantity_api' cart_item.product.id cart_item.id %}">
                     <div class="input-group-append">
                         <button class="btn btn-light quantity-btn" type="button" data-action="increase" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}">
                             <i class="fa fa-plus"></i>
                         </button>
                     </div>
                 </div>
-            </div>
+            </figure>
         </td>
-        <td class="text-right">
-            <button class="btn btn-danger remove-cart-item-btn" type="button" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}">Löschen</button>
+        <td class="loschen-cell text-center align-middle">
+            <figure class="itemside align-items-center justify-content-center">
+                <button class="btn btn-danger remove-cart-item-btn" type="button" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}">Löschen</button>
+            </figure>
         </td>
     </tr>
     {% endfor %}
@@ -75,26 +156,8 @@
         <aside class="col-lg-3">
     
             <div class="card">
-                <!-- <div class="card-body">
-                    <dl class="dlist-align">
-                        <dt>Total price:</dt>
-                        <dd class="text-right">€{{ total }}</dd>
-                    </dl>
-                    
-                    <dl class="dlist-align">
-                        <dt>Tax:</dt>
-                        <dd class="text-right"> €{{ tax }}</dd>
-                    </dl>
-                    <dl class="dlist-align">
-                    
-                        <dt>Total:</dt>
-                        <dd class="text-right text-dark b"><strong>€{{ grand_total }}</strong></dd>
-                    </dl>
-                    <hr>
-                    <p class="text-center mb-3">
-                        <img src="{% static 'images/misc/payments.png' %}" height="26">
-                    </p> -->
-                    <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Zur Kasse </a>
+                <div class="card-body">
+                    <a href="{% url 'checkout' %}" class="btn btn-primary btn-block" id="checkout-button"> Zur Kasse </a>
                     <a href="{% url 'store' %}" class="btn btn-light btn-block">Weiter einkaufen</a>
                 </div> <!-- card-body.// -->
             </div> <!-- card.// -->
@@ -154,6 +217,17 @@ $(document).ready(function() {
                         $(`tr[data-cart-item-id="${cartItemId}"] input`).val(response.product_quantity);
                     } else {
                         $(`tr[data-cart-item-id="${cartItemId}"]`).remove();
+
+                        // Eğer sepet boşaldıysa, sepeti boş göster
+                        if ($('#cart-items').children().length === 0) {
+                            $('#cart-container').html(`
+                                <h2 class="text-center">Ihr Einkaufswagen ist leer</h2>
+                                <br>
+                                <div class="text-center">
+                                    <a href="{% url 'store' %}" class ="btn btn-primary">Weiter einkaufen </a>
+                                </div>
+                            `);
+                        }
                     }
                 }
             },
@@ -178,6 +252,17 @@ $(document).ready(function() {
                 } else {
                     updateCartCount(response.cart_count);
                     $(`tr[data-cart-item-id="${cartItemId}"]`).remove();
+
+                    // Eğer sepet boşaldıysa, sepeti boş göster
+                    if ($('#cart-items').children().length === 0) {
+                        $('#cart-container').html(`
+                            <h2 class="text-center">Ihr Einkaufswagen ist leer</h2>
+                            <br>
+                            <div class="text-center">
+                                <a href="{% url 'store' %}" class ="btn btn-primary">Weiter einkaufen </a>
+                            </div>
+                        `);
+                    }
                 }
             },
             error: function(xhr, status, error) {
@@ -187,6 +272,7 @@ $(document).ready(function() {
         });
     }
 
+    // Handle quantity button clicks
     $(document).on('click', '.quantity-btn', function(e) {
         e.preventDefault();
         var productId = $(this).data('product-id');
@@ -195,6 +281,45 @@ $(document).ready(function() {
         handleQuantityChange(productId, cartItemId, action);
     });
 
+    // Handle manual quantity input
+    $(document).on('change', '.update-quantity', function(e) {
+        e.preventDefault();
+        var productId = $(this).closest('tr').find('.quantity-btn').data('product-id');
+        var cartItemId = $(this).closest('tr').find('.quantity-btn').data('cart-item-id');
+        var quantity = $(this).val();
+
+        // Validate the quantity before sending the request
+        quantity = parseInt(quantity);
+        if (isNaN(quantity) || quantity <= 0) {
+            alert("Lütfen geçerli bir miktar girin.");
+            return;
+        }
+
+        $.ajax({
+            url: `/api/cart/update_quantity/${productId}/${cartItemId}/`,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: {
+                quantity: quantity
+            },
+            success: function(response) {
+                if (response.error) {
+                    showNotification(response.error);
+                } else {
+                    updateCartCount(response.cart_count);
+                    $(`tr[data-cart-item-id="${cartItemId}"] input`).val(response.quantity);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error: ', status, error);
+                showNotification('An error occurred: ' + error);
+            }
+        });
+    });
+
+    // Handle remove item button clicks
     $(document).on('click', '.remove-cart-item-btn', function(e) {
         e.preventDefault();
         var productId = $(this).data('product-id');

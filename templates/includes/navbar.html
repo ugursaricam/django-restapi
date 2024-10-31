@@ -1,84 +1,68 @@
 {% load static %}
 
-<!-- <header class="section-header">
-    <nav class="navbar p-md-0 navbar-expand-sm navbar-light border-bottom">
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop4" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarTop4">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item dropdown">
-                 <a href="#" class="nav-link">   English </a>
-                
-            </li>
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link"> USD </a>
-            </li>
-        </ul>
-        <ul class="navbar-nav">
-            <li><a href="#" class="nav-link"> <i class="fa fa-envelope"></i> Email </a></li>
-            <li><a href="#" class="nav-link"> <i class="fa fa-phone"></i> Call us </a></li>
-        </ul>
-      </div> 
-    </div> 
-    </nav> -->
-
     <section class="header-main border-bottom">
         <div class="container">
             <div class="row align-items-center">
+                <!-- Logo -->
                 <div class="col-lg-2 col-md-3 col-6">
                     <a href="{% url 'store' %}" class="brand-wrap">
                         <img class="logo" src="{% static './images/gemex_logo.png' %}">
-                    </a> <!-- brand-wrap.// -->
+                    </a>
                 </div>
-                <div class="col-lg col-sm col-md col-6 flex-grow-0">
-                    <!-- Empty column for spacing -->
-                </div> <!-- col.// -->
-                <div class="col-lg-3 col-md-6 col-6">
-                    <a href="{% url 'store' %}" class="btn btn-primary" style=" padding: 0.5rem 5rem;">Shop</a>
+    
+                <!-- Empty column for spacing -->
+                <div class="col-lg col-md-3 d-none d-lg-block">
+                    <!-- Boşluk -->
                 </div>
-                <div class="col-lg col-md-6 col-sm-12 col">
+    
+                <!-- Shop Button -->
+                <div class="col-lg-3 col-md-6 col-6 text-center">
+                    <a href="{% url 'store' %}" class="btn btn-primary px-5 py-2">Shop</a>
+                </div>
+    
+                <!-- Search Form -->
+                <div class="col-lg col-md-12 col-sm-12 col order-2 order-lg-0 mt-3 mt-lg-0">
                     <form action="{% url 'search' %}" class="search" method="GET">
-                        <div class="input-group w-100">
-                            <input type="text" class="form-control" style="max-width: 200px;" placeholder="Search" name="keyword">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search" name="keyword">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="submit">
                                     <i class="fa fa-search"></i>
                                 </button>
                             </div>
                         </div>
-                    </form> <!-- search-wrap .end// -->
-                </div> <!-- col.// -->
-                <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
-                    <div class="justify-content-end mb-3 mb-lg-0">
+                    </form>
+                </div>
+    
+                <!-- User & Cart Icons -->
+                <div class="col-lg-3 col-sm-6 col-8 order-3 order-lg-2 text-right d-flex align-items-center justify-content-lg-end">
+                    <div class="user-info mr-3">
                         {% if user.id is None %}
-                        <div class="widget-header">
-                            <small class="title text-muted">Willkommen, Gast!</small>
-                            <div>
-                                <a href="{% url 'login' %}">Anmelden</a> <span class="dark-transp"> | </span>
-                                <a href="{% url 'register' %}"> Registrieren</a>
-                            </div>
+                        <small class="text-muted">Willkommen, Gast!</small>
+                        <div>
+                            <a href="{% url 'login' %}" style="font-size: 0.9em;">Anmelden</a> <span class="dark-transp"> | </span>
+                            <a href="{% url 'register' %}" style="font-size: 0.9em;">Registrieren</a>
                         </div>
                         {% else %}
-                        <div class="widget-header">
-                            <small class="title text-muted">Willkommen, {{user.first_name}}!</small>
-                            <div>
-                                <a href="{% url 'dashboard' %}">Dashboard</a> <span class="dark-transp"> | </span>
-                                <a href="{% url 'logout' %}"> Abmelden</a>
-                            </div>
+                        <small class="text-muted">Willkommen, {{user.first_name}}!</small>
+                        <div>
+                            <a href="{% url 'dashboard' %}" style="font-size: 0.9em;">Dashboard</a> <span class="dark-transp"> | </span>
+                            <a href="{% url 'logout' %}" style="font-size: 0.9em;">Abmelden</a>
                         </div>
                         {% endif %}
-                        <a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
-                            <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-                            <span class="badge badge-pill badge-danger notify" id="cart-count">{{ cart_count }}</span>
-                        </a>
-                    </div> <!-- widgets-wrap.// -->
-                </div> <!-- col.// -->
-            </div> <!-- row.// -->
-        </div> <!-- container.// -->
-    </section> <!-- header-main .// -->
-    </header> <!-- section-header.// -->
+                    </div>
     
+                    <!-- Cart Icon -->
+                    <a href="{% url 'cart' %}" class="widget-header ml-3">
+                        <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
+                        <span class="badge badge-pill badge-danger notify" id="cart-count">{{ cart_count }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+
 
     
